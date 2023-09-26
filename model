@@ -108,3 +108,52 @@ SVM_Model_pkl = open(SVM_pkl_filename, 'wb')
 pickle.dump(SVM, SVM_Model_pkl)
 # Close the pickle instances
 SVM_Model_pkl.close()
+from sklearn.linear_model import LogisticRegression
+
+LogReg = LogisticRegression(random_state=2)
+
+LogReg.fit(Xtrain,Ytrain)
+
+predicted_values = LogReg.predict(Xtest)
+
+x = metrics.accuracy_score(Ytest, predicted_values)
+acc.append(x)
+model.append('Logistic Regression')
+print("Logistic Regression's Accuracy is: ", x)
+
+print(classification_report(Ytest,predicted_values))
+# Cross validation score (Logistic Regression)
+score = cross_val_score(LogReg,features,target,cv=5)
+score
+import pickle
+# Dump the trained Naive Bayes classifier with Pickle
+LR_pkl_filename = 'C:/Users/chandana/Desktop/Harvestify/models/LogisticRegression.pkl'
+# Open the file to save as pkl file
+LR_Model_pkl = open(DT_pkl_filename, 'wb')
+pickle.dump(LogReg, LR_Model_pkl)
+# Close the pickle instances
+LR_Model_pkl.close()
+from sklearn.ensemble import RandomForestClassifier
+
+RF = RandomForestClassifier(n_estimators=20, random_state=0)
+RF.fit(Xtrain,Ytrain)
+
+predicted_values = RF.predict(Xtest)
+
+x = metrics.accuracy_score(Ytest, predicted_values)
+acc.append(x)
+model.append('RF')
+print("RF's Accuracy is: ", x)
+
+print(classification_report(Ytest,predicted_values))
+# Cross validation score (Random Forest)
+score = cross_val_score(RF,features,target,cv=5)
+score
+import pickle
+# Dump the trained Naive Bayes classifier with Pickle
+RF_pkl_filename = 'C:/Users/chandana/Desktop/Harvestify/models/RandomForest.pkl'
+# Open the file to save as pkl file
+RF_Model_pkl = open(RF_pkl_filename, 'wb')
+pickle.dump(RF, RF_Model_pkl)
+# Close the pickle instances
+RF_Model_pkl.close()
