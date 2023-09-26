@@ -1,6 +1,6 @@
 # Importing libraries
 
-from _future_ import print_function
+from __future__ import print_function
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -157,27 +157,40 @@ RF_Model_pkl = open(RF_pkl_filename, 'wb')
 pickle.dump(RF, RF_Model_pkl)
 # Close the pickle instances
 RF_Model_pkl.close()
-from sklearn.ensemble import RandomForestClassifier
+import xgboost as xgb
+XB = xgb.XGBClassifier()
+XB.fit(Xtrain,Ytrain)
 
-RF = RandomForestClassifier(n_estimators=20, random_state=0)
-RF.fit(Xtrain,Ytrain)
-
-predicted_values = RF.predict(Xtest)
+predicted_values = XB.predict(Xtest)
 
 x = metrics.accuracy_score(Ytest, predicted_values)
 acc.append(x)
-model.append('RF')
-print("RF's Accuracy is: ", x)
+model.append('XGBoost')
+print("XGBoost's Accuracy is: ", x)
 
 print(classification_report(Ytest,predicted_values))
-# Cross validation score (Random Forest)
-score = cross_val_score(RF,features,target,cv=5)
+# Cross validation score (XGBoost)
+score = cross_val_score(XB,features,target,cv=5)
 score
 import pickle
 # Dump the trained Naive Bayes classifier with Pickle
-RF_pkl_filename = 'C:/Users/chandana/Desktop/Harvestify/models/RandomForest.pkl'
+XB_pkl_filename = 'C:/Users/chandana/Desktop/Harvestify/models/XGBoost.pkl'
 # Open the file to save as pkl file
-RF_Model_pkl = open(RF_pkl_filename, 'wb')
-pickle.dump(RF, RF_Model_pkl)
+XB_Model_pkl = open(XB_pkl_filename, 'wb')
+pickle.dump(XB, XB_Model_pkl)
 # Close the pickle instances
-RF_Model_pkl.close()
+XB_Model_pkl.close()
+plt.figure(figsize=[10,5],dpi = 100)
+plt.title('Accuracy Comparison')
+plt.xlabel('Accuracy')
+plt.ylabel('Algorithm')
+sns.barplot(x = acc,y = model,palette='dark')
+accuracy_models = dict(zip(model, acc))
+for k, v in accuracy_models.items():
+    print (k, '-->', v)
+data = np.array([[104,18, 30, 23.603016, 60.3, 6.7, 140.91]])
+prediction = RF.predict(data)
+print(prediction)
+data = np.array([[83, 45, 60, 28, 70.3, 7.0, 150.9]])
+prediction = RF.predict(data)
+print(prediction)
