@@ -1,109 +1,94 @@
-{% extends 'layout.html' %} {% block body %}
-
-<style>
-
-    html body {
-      background-color: rgb(206, 206, 228);
-
-      
-  }
-
-  
-</style>
-<!--Form Section-->
-<br /><br />
-<h2 style="text-align: center; margin: 0px; color: black">
-  <b>Find out the most suitable crop to grow in your farm</b>
-</h2>
-<br />
-
-<div
-  style="
-    width: 350px;
-    height: 50rem;
-    margin: 0px auto;
-    color: black;
-    border-radius: 25px;
-    padding: 10px 10px;
-  "
->
-  <form method="POST" action="{{ url_for('crop_prediction') }}">
-    <div class="form-group">
-      <label for="SoilType" style="font-size: 17px"><b>SoilType</b></label>
-      <input
-        type="string"
-        class="form-control"
-        id="SoilType"
-        name="SoilType"
-        placeholder="Enter the value (example:black)"
-        style="font-weight: bold"
-        required
-      />
-
-    <div class="form-group">
-      <label for="ph" style="font-size: 17px"><b>ph level</b></label>
-      <input
-        type="number"
-        step="0.01"
-        class="form-control"
-        id="ph"
-        name="ph"
-        placeholder="Enter the value"
-        style="font-weight: bold"
-        required
-      />
-    </div>
-      <label for="Rainfall" style="font-size: 17px"><b>Rainfall (in mm)</b></label>
-      <input
-        type="number"
-        step="0.01"
-        class="form-control"
-        id="Rainfall"
-        name="rainfall"
-        placeholder="Enter the value"
-        style="font-weight: bold"
-        required
-      />
-    </div>
-    <div class="form-group">
-      <label for="State" style="font-size: 17px "><b>State</b></label>
-      <select
-        onchange="print_city('state', this.selectedIndex);"
-        id="sts"
-        name="stt"
-        class="form-control"
-        style="font-weight: bold; color: black;"
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Crop Recommendation</title>
+    <style>
+        /* Add CSS styles for better presentation */
+        label {
+            display: block;
+            font-weight: bold;
+        }
+        .soil-images {
+            display: flex;
+            justify-content: space-between;
+        }
+        .soil-image {
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+        .soil-image:hover {
+            border-color: blue;
+        }
+    </style>
+</head>
+<body>
+    <h1>Crop Recommendation</h1>
+    <form id="cropForm">
+        <label for="soilType">Select Soil Type:</label>
+        <div class="soil-images">
+            <!-- Soil type images (replace with actual image URLs) -->
+            <img class="soil-image" src="soil1.jpg" alt="Soil Type 1" onclick="selectSoil(1)">
+            <img class="soil-image" src="soil2.jpg" alt="Soil Type 2" onclick="selectSoil(2)">
+            <!-- Add images for other soil types -->
+        </div>
         
-        required
-      ></select>
-      <br />
-      <label for="City" style="font-size: 17px"><b>City</b></label>
-      <select
-        id="state"
-        class="form-control"
-        name="city"
-        style="font-weight: bold; color: black;"
-        required
-      ></select>
-      <script language="javascript">
-        print_state("sts");
-      </script>
+        <label for="location">Enter Location:</label>
+        <input type="text" id="location" name="location" required>
+
+        <button type="submit">Get Crop Recommendations</button>
+    </form>
+
+    <div id="cropRecommendations">
+        <!-- Display crop recommendations here -->
     </div>
 
-    <div class="d-flex justify-content-center">
-      <button
-        type="submit"
-        class="btn btn-info"
-        style="color: black; font-weight: bold; width: 130px; height:50px; border-radius:12px; font-size: 21px;"
-      >
-        Predict
-      </button>
-    </div>
-  </form>
-</div>
+    <script>
+        let selectedSoil = null;
 
+        function selectSoil(soilNumber) {
+            selectedSoil = soilNumber;
+            const soilImages = document.querySelectorAll('.soil-image');
+            soilImages.forEach((image, index) => {
+                if (index + 1 === soilNumber) {
+                    image.style.border = '2px solid blue';
+                } else {
+                    image.style.border = '2px solid transparent';
+                }
+            });
+        }
 
+        document.getElementById('cropForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            if (selectedSoil === null) {
+                alert('Please select a soil type.');
+                return;
+            }
+            const locationInput = document.getElementById('location').value;
 
-<!-- Form section -->
+            // Create an object with input data
+            const requestData = {
+                soil_type: selectedSoil,
+                location: locationInput,
+            };
 
-{% endblock %}
+            // Make an AJAX request to your backend to get crop recommendations
+            fetch('/get_crop_recommendations', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(requestData),
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Display recommendations on the webpage
+                const recommendationsDiv = document.getElementById('cropRecommendations');
+                recommendationsDiv.innerHTML = `<p>Crop Recommendations: ${data.recommendations.join(', ')}</p>`;
+            })
+            .catch(error => {
+                console.error(error);
+            });
+        });
+    </script>
+</body>
+</html>
