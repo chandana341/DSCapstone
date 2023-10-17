@@ -1,0 +1,80 @@
+from flask import Flask, request, jsonify
+import requests
+import firebase_admin
+from firebase_admin import credentials, firestore
+
+app = Flask(_name_)
+
+# Initialize Firebase Admin SDK with your service account key
+cred = credentials.Certificate('/content/agriadvisor-7d426-firebase-adminsdk-6onfn-8bada5d866.json')
+firebase_admin.initialize_app(cred)
+
+# Initialize Firestore
+db = firestore.client()
+# Define a function to fetch weather data from an external API
+def fetch_weather(location):
+    # Implement your logic to fetch weather data from an external API
+    # and return it as a dictionary
+    # Example: You can use an external weather API like OpenWeatherMap
+
+    # Replace 'your_api_key' with your actual API key
+    api_key = 'a016876ef1e66bf9c2c06658f3f12332'
+    base_url = 'https://api.openweathermap.org/data/2.5/weather'
+    params = {
+        'q': location,
+        'appid': api_key,
+        'units': 'metric'  # Adjust as needed
+    }
+
+    response = requests.get(base_url, params=params)
+    if response.status_code == 200:
+        return response.json()
+    else:
+        return None
+
+# Define a function to generate crop recommendations based on soil, location, and weather data
+def get_crop_recommendations(soil_type, location, weather_data):
+    # Implement your logic to generate crop recommendations based on input data
+    # Use soil type, location, and weather data to determine the best crops
+
+    # Example: A very simple recommendation logic based on temperature
+    temperature = weather_data.get('main', {}).get('temp', 0)
+
+    if 25 <= temperature <= 30:
+        return ['Tomatoes', 'Peppers', 'Cucumbers']
+    elif 20 <= temperature < 25:
+        return ['Lettuce', 'Spinach', 'Kale']
+    else:
+        return ['Wheat', 'Barley', 'Rye']
+
+@app.route('/get_crop_recommendations', methods=['POST'])
+def get_crop_recommendations_endpoint():
+    data = request.get_json()
+    soil_type = data['soil_type']
+    location = data['location']
+
+    # Fetch weather data for the specified location
+    weather_data = fetch_weather(location)
+
+    if weather_data is None:
+        return jsonify({'error': 'Failed to fetch weather data'})
+
+    # Generate crop recommendations based on soil, location, and weather data
+    crop_recommendations = get_crop_recommendations(soil_type, location, weather_data)
+
+    # Store the recommendations and input data in Firestore
+    doc_ref = db.collection('recommendations').document()
+    doc_ref.set({
+        'soil_type': soil_type,
+        'location': location,
+        'recommendations': crop_recommendations,
+        'weather_data': weather_data
+    })
+
+    return jsonify({
+        'recommendations': crop_recommendations,
+        'weather_data': weather_data
+    })
+
+if _name_ == '_main_':
+    app.run(debug=True)
