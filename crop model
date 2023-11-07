@@ -2,7 +2,6 @@ from flask import Flask, request, jsonify
 import requests
 import firebase_admin
 from firebase_admin import credentials, firestore
-
 app = Flask(_name_)
 
 # Initialize Firebase Admin SDK with your service account key
